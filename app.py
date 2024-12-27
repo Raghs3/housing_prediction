@@ -22,7 +22,7 @@ if uploaded_file:
 
     feature_columns = ["bath", "balcony", "bhk", "price_per_sqft", "new_total_sqft"]
     target_column = "price"
-    location_column = "site_location"
+    location_column = "_site_location"
 
     # Select features and target
     # st.sidebar.header("Dataset Configuration")
