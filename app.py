@@ -46,13 +46,13 @@ if uploaded_file:
             locations = None
 
         # One-hot encode the location column
-        encoder = OneHotEncoder(sparse_output=False)
-        location_encoded = encoder.fit_transform(X[[location_column]])
-        
-        # Replace the location column with encoded values
-        location_columns = encoder.get_feature_names_out([location_column])
-        X_encoded = pd.DataFrame(location_encoded, columns=location_columns, index=X.index)
-        X = pd.concat([X.drop(columns=[location_column]), X_encoded], axis=1)
+        # encoder = OneHotEncoder(sparse_output=False)
+        # location_encoded = encoder.fit_transform(X[[location_column]])
+        # 
+        # # Replace the location column with encoded values
+        # location_columns = encoder.get_feature_names_out([location_column])
+        # X_encoded = pd.DataFrame(location_encoded, columns=location_columns, index=X.index)
+        # X = pd.concat([X.drop(columns=[location_column]), X_encoded], axis=1)
 
 
         # Test size slider
