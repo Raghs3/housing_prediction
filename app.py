@@ -11,7 +11,7 @@ import streamlit as st
 st.title("Custom Housing Price Predictor")
 
 # Upload dataset
-uploaded_file = "entire_dataset.csv"  # st.file_uploader("Upload your dataset (CSV file)", type=["csv"])
+uploaded_file = "no_outliers.csv"  # st.file_uploader("Upload your dataset (CSV file)", type=["csv"])
 if uploaded_file:
     # Load dataset
     data = pd.read_csv(uploaded_file)
