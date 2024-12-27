@@ -1,10 +1,10 @@
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.preprocessing import OneHotEncoder
 import streamlit as st
 
 # Streamlit App
@@ -20,15 +20,19 @@ if uploaded_file:
     st.subheader("Dataset Overview")
     st.write(data.head())
 
+    feature_columns = ["bath", "balcony", "bhk", "price_per_sqft", "new_total_sqft", "site_location"]
+    target_column = "price"
+    location_column = "site_location"
+
     # Select features and target
-    st.sidebar.header("Dataset Configuration")
-    target_column = st.sidebar.selectbox("Select Target Column (Price)", data.columns)
-    feature_columns = st.sidebar.multiselect(
-        "Select Feature Columns (Predictors)", [col for col in data.columns if col != target_column]
-    )
-    location_column = st.sidebar.selectbox(
-        "Select Location Column (Optional)", [None] + list(data.columns), index=0
-    )
+    # st.sidebar.header("Dataset Configuration")
+    # target_column = st.sidebar.selectbox("Select Target Column (Price)", data.columns)
+    # feature_columns = st.sidebar.multiselect(
+    #     "Select Feature Columns (Predictors)", [col for col in data.columns if col != target_column]
+    # )
+    # location_column = st.sidebar.selectbox(
+    #     "Select Location Column (Optional)", [None] + list(data.columns), index=0
+    # )
 
     if target_column and feature_columns:
         X = data[feature_columns]
@@ -40,6 +44,16 @@ if uploaded_file:
             locations = X["Location"].unique()
         else:
             locations = None
+
+        # One-hot encode the location column
+        encoder = OneHotEncoder(sparse_output=False)
+        location_encoded = encoder.fit_transform(X[[location_column]])
+        
+        # Replace the location column with encoded values
+        location_columns = encoder.get_feature_names_out([location_column])
+        X_encoded = pd.DataFrame(location_encoded, columns=location_columns, index=X.index)
+        X = pd.concat([X.drop(columns=[location_column]), X_encoded], axis=1)
+
 
         # Test size slider
         test_size = st.sidebar.slider("Test Size", min_value=0.1, max_value=0.5, step=0.05, value=0.2)
