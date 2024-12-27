@@ -416,24 +416,24 @@
 
 
 
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.preprocessing import OneHotEncoder
 import streamlit as st
 
 # Predefined dataset and configuration
-DATA_PATH = "your_dataset.csv"  # Replace with the actual path to your dataset
-PREDICTORS = ["Predictor1", "Predictor2", "Predictor3"]  # Replace with your predictor column names
+DATA_PATH = "your_dataset.csv"  # Replace with the actual dataset path
+PREDICTORS = ["Predictor1", "Predictor2", "LocationColumn"]  # Replace with your predictors
 TARGET = "TargetColumn"  # Replace with your target column name
-LOCATION_COLUMN = "LocationColumn"  # Replace with your location column name
+LOCATION_COLUMN = "LocationColumn"  # Replace with the location column name
 
 # Streamlit App
-st.title("Custom Housing Price Predictor")
+st.title("Housing Price Predictor with Location")
 
-# Load the predefined dataset
+# Load the dataset
 data = pd.read_csv(DATA_PATH)
 
 # Display dataset overview
@@ -443,27 +443,28 @@ st.write(data.head())
 # Extract features and target
 X = data[PREDICTORS]
 y = data[TARGET]
-X["Location"] = data[LOCATION_COLUMN]
-locations = X["Location"].unique()
+
+# One-hot encode the location column
+encoder = OneHotEncoder(sparse=False)
+location_encoded = encoder.fit_transform(X[[LOCATION_COLUMN]])
+
+# Replace the location column with encoded values
+location_columns = encoder.get_feature_names_out([LOCATION_COLUMN])
+X_encoded = pd.DataFrame(location_encoded, columns=location_columns, index=X.index)
+X = pd.concat([X.drop(columns=[LOCATION_COLUMN]), X_encoded], axis=1)
 
 # Test size slider
 st.sidebar.header("Model Configuration")
 test_size = st.sidebar.slider("Test Size", min_value=0.1, max_value=0.5, step=0.05, value=0.2)
-
-# Random state slider
 random_state = st.sidebar.number_input("Random State", min_value=0, step=1, value=42)
 
 # Split data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
-# Drop location column for training
-X_train_model = X_train.drop(columns=["Location"])
-X_test_model = X_test.drop(columns=["Location"])
-
 # Train the model
 model = LinearRegression()
-model.fit(X_train_model, y_train)
-y_pred = model.predict(X_test_model)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
 
 # Calculate metrics
 mae = mean_absolute_error(y_test, y_pred)
@@ -474,28 +475,26 @@ st.subheader("Model Performance")
 st.write("**Mean Absolute Error (MAE):**", mae)
 st.write("**R² Score:**", r2)
 
-# Visualization
-st.subheader("Actual vs Predicted Prices")
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(y_test, y_pred, alpha=0.6, label="Predictions")
-ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', label="Perfect Prediction Line")
-ax.set_title("Actual vs Predicted House Prices")
-ax.set_xlabel("Actual Prices")
-ax.set_ylabel("Predicted Prices")
-ax.legend()
-ax.grid()
-st.pyplot(fig)
+# User interaction for prediction
+st.subheader("Predict Prices")
+input_data = {}
 
-# Predict prices for a selected location
-st.subheader("Predict Prices for a Location")
-location_selected = st.selectbox("Select a Location", locations)
+# Input predictors
+for predictor in PREDICTORS:
+    if predictor == LOCATION_COLUMN:
+        selected_location = st.selectbox("Select Location", encoder.categories_[0])
+        input_data[predictor] = selected_location
+    else:
+        input_data[predictor] = st.number_input(f"Enter {predictor}", value=float(data[predictor].mean()))
 
-# Filter data by selected location
-location_data = X[X["Location"] == location_selected].drop(columns=["Location"])
-if not location_data.empty:
-    location_prediction = model.predict(location_data)
-    actual_prices = y[X["Location"] == location_selected]
-    st.write(f"**Predicted Price for {location_selected}:** {location_prediction[0]:.2f}")
-    st.write(f"**Actual Price for {location_selected}:** {actual_prices.values[0]:.2f}")
-else:
-    st.write("No data available for the selected location.")
+# Encode the selected location
+location_encoded = encoder.transform([[input_data[LOCATION_COLUMN]]])
+location_encoded_df = pd.DataFrame(location_encoded, columns=location_columns)
+
+# Combine user input into a single feature row
+input_features = pd.concat([pd.DataFrame([input_data]).drop(columns=[LOCATION_COLUMN]), location_encoded_df], axis=1)
+
+# Predict the price
+if st.button("Predict"):
+    prediction = model.predict(input_features)
+    st.write(f"**Predicted Price:** {prediction[0]:.2f}")
