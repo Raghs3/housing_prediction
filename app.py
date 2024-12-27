@@ -20,7 +20,7 @@ if uploaded_file:
     st.subheader("Dataset Overview")
     st.write(data.head())
 
-    feature_columns = ["bath", "balcony", "bhk", "price_per_sqft", "new_total_sqft", "site_location"]
+    feature_columns = ["bath", "balcony", "bhk", "price_per_sqft", "new_total_sqft"]
     target_column = "price"
     location_column = "site_location"
 
