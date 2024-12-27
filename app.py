@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -22,8 +23,12 @@ if uploaded_file:
     # Select features and target
     st.sidebar.header("Dataset Configuration")
     target_column = st.sidebar.selectbox("Select Target Column (Price)", data.columns)
-    feature_columns = st.sidebar.multiselect("Select Feature Columns (Predictors)", [col for col in data.columns if col != target_column])
-    location_column = st.sidebar.selectbox("Select Location Column (Optional)", [None] + list(data.columns), index=0)
+    feature_columns = st.sidebar.multiselect(
+        "Select Feature Columns (Predictors)", [col for col in data.columns if col != target_column]
+    )
+    location_column = st.sidebar.selectbox(
+        "Select Location Column (Optional)", [None] + list(data.columns), index=0
+    )
 
     if target_column and feature_columns:
         X = data[feature_columns]
