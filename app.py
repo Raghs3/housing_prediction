@@ -35,7 +35,7 @@ def get_prediction(_model, input_data):
 st.title("Custom Housing Price Predictor")
 
 # Upload dataset
-uploaded_file = st.file_uploader("Upload your dataset (CSV file)", type=["csv"])
+uploaded_file = "no_outliers.csv"  # st.file_uploader("Upload your dataset (CSV file)", type=["csv"])
 
 if uploaded_file:
     # Load dataset
