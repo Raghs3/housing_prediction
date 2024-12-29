@@ -1122,7 +1122,7 @@ if uploaded_file:
 
     # User inputs
     bath = st.number_input("Number of Bathrooms", min_value=0, step=1, value=1)
-    balcony = st.number_input("Number of Balconies", min_value=0, step=1, value=1)
+    balcony = st.number_input("Number of Balconies", min_value=0, step=1, value=0)
     bhk = st.number_input("Number of BHKs", min_value=1, step=1, value=2)
     price_per_sqft = st.number_input("Price per Square Foot", min_value=0.0, step=1.0, value=5000.0)
     new_total_sqft = st.number_input("Total Square Foot Area", min_value=0.0, step=1.0, value=1000.0)
